@@ -8,15 +8,46 @@ output:
 
 ## Loading and preprocessing the data
 
+```{r}
 
+setwd("C:/Users/jae/Documents/GitHub/RepData_PeerAssessment1/")
+activity_data <- read.csv("activity.csv")
+```
 
 ## What is mean total number of steps taken per day?
 
-
+```{r}
+total_steps_per_day <- aggregate(steps~date, data=activity_data, FUN=sum)
+hist(total_steps_per_day$steps)
+mean_steps_per_day <- aggregate(steps~date, data=activity_data, FUN=mean, na.rm=T)
+mean(mean_steps_per_day$steps)
+median(mean_steps_per_day$steps)
+```
 
 ## What is the average daily activity pattern?
+```{r}
 
 
+
+
+
+
+steps_per_day$weekdays <- factor(weekdays(as.Date(mean_steps_per_day$date)))
+means_for_each_weekday <- aggregate(steps ~ weekdays, data=mean_steps_per_day, FUN=mean)
+sd_for_each_weekday <- aggregate(steps ~ weekdays, data=steps_per_day, FUN=sd)
+names(means_for_each_weekday) <- c("Weekdays","Mean")
+names(sd_for_each_weekday) <- c("Weekdays", "Sd")
+means_and_sds_for_each_weekday <- merge(x=means_for_each_weekday, y=sd_for_each_weekday, by="Weekdays")
+means_and_sds_for_each_weekday$t <- factor(means_and_sds_for_each_weekday$Weekdays,
+            levels=c("Sunday", "Monday", "Tuesday", "Wednesday",
+                     "Thursday", "Friday", "Saturday"))
+
+require(ggplot2)
+ggplot(means_and_sds_for_each_weekday, aes(x=t, y=Mean)) + 
+  geom_bar(stat="identity") + 
+  labs(x="Weekdays", y="Mean steps per day")
+
+```
 
 ## Imputing missing values
 
