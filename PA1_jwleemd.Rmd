@@ -6,26 +6,36 @@ keep_md: true
 ---
 
 
-## Loading and preprocessing the data
+The activity data is loaded into R using read.csv() command. 
 
-```{r, echo=TRUE}
+```{r read_data, echo=TRUE}
 
 activity_data <- read.csv("activity.csv")
 ```
 
-## What is mean total number of steps taken per day?
+Then, the total number of steps taken per day is calculated.
 
 ```{r, echo=TRUE}
 total_steps_per_day <- aggregate(steps~date, data=activity_data, FUN=sum)
+```
+The histogram for total steps per day is plotted, and the mean and median for total steps per day are reported.
+
+```{r histogram, echo=TRUE}
 hist(total_steps_per_day$steps, 
      main="Histogram of total number of steps per day",
      ylim = c(0,30),
      xlab="Total number of steps per day")
+```
+
+
+```{r, mean ane median for total steps per day, echo=TRUE}
 mean(total_steps_per_day$steps)
 median(total_steps_per_day$steps)
 ```
 
-## What is the average daily activity pattern?
+### What is the average daily activity pattern?
+
+The av
 ```{r, echo=TRUE}
 
 average_steps_per_interval <- aggregate(steps ~ interval, 
@@ -73,18 +83,27 @@ median(total_steps_per_day_new$steps)
 
 ## Are there differences in activity patterns between weekdays and weekends?
 ```{r, echo = TRUE}
-steps_per_day$weekdays <- factor(weekdays(as.Date(mean_steps_per_day$date)))
-means_for_each_weekday <- aggregate(steps ~ weekdays, data=mean_steps_per_day, FUN=mean)
-sd_for_each_weekday <- aggregate(steps ~ weekdays, data=steps_per_day, FUN=sd)
-names(means_for_each_weekday) <- c("Weekdays","Mean")
-names(sd_for_each_weekday) <- c("Weekdays", "Sd")
-means_and_sds_for_each_weekday <- merge(x=means_for_each_weekday, y=sd_for_each_weekday, by="Weekdays")
-means_and_sds_for_each_weekday$t <- factor(means_and_sds_for_each_weekday$Weekdays,
-                                           levels=c("Sunday", "Monday", "Tuesday", "Wednesday",
-                                                    "Thursday", "Friday", "Saturday"))
 
-require(ggplot2)
-ggplot(means_and_sds_for_each_weekday, aes(x=t, y=Mean)) + 
-        geom_bar(stat="identity") + 
-        labs(x="Weekdays", y="Mean steps per day")
+dates <- weekdays(as.Date(activity_data_new$date))
+weekdays <- ifelse(dates%in%c("Saturday","Sunday"), "Weekend","Weekdays")
+activity_data_new$weekdays <- weekdays
+activity_data_new$weekdays <- as.factor(activity_data_new$weekdays)
+
+weekdays_data <- activity_data_new[activity_data_new$weekdays=="Weekdays",]
+weekend_data <- activity_data_new[activity_data_new$weekdays=="Weekend",]
+
+average_steps_per_interval_weekdays <- aggregate(steps ~ interval, 
+                                        data=weekdays_data, 
+                                        FUN=mean, na.rm=T)
+
+plot(steps ~ interval, data=average_steps_per_interval_weekdays, type="l", col="blue",
+     main="Mean steps per inverval")
+
+average_steps_per_interval_weekend <- aggregate(steps ~ interval, 
+                                        data=weekend_data, 
+                                        FUN=mean, na.rm=T)
+
+lines(steps ~ interval, data=average_steps_per_interval_weekend, type="l", col="red")
+legend("topright", c("Weekdays","Weekend"), col=c("blue","red"), pch=19)
+
 ```
