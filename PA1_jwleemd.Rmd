@@ -28,9 +28,12 @@ median(total_steps_per_day$steps)
 ## What is the average daily activity pattern?
 ```{r}
 
-steps_per_interval <- aggregate(steps ~ interval, data=activity_data, FUN=mean, na.rm=T)
-plot(steps ~ interval, data=steps_per_interval, type="l")
-which.max(steps_per_interval$steps)
+average_steps_per_interval <- aggregate(steps ~ interval, 
+                                        data=activity_data, 
+                                        FUN=mean, na.rm=T)
+
+plot(steps ~ interval, data=average_steps_per_interval, type="l")
+average_steps_per_interval$interval[which.max(average_steps_per_interval$steps)]
 
 ```
 
