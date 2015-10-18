@@ -5,6 +5,7 @@ html_document:
 keep_md: true
 ---
 
+### Loading and preprocessing the data
 
 The activity data is loaded into R using read.csv() command. 
 
@@ -13,7 +14,9 @@ The activity data is loaded into R using read.csv() command.
 activity_data <- read.csv("activity.csv")
 ```
 
-Then, the total number of steps taken per day is calculated.
+### What is mean total number of steps taken per day?
+
+The total number of steps taken per day is calculated using aggregate().
 
 ```{r, echo=TRUE}
 total_steps_per_day <- aggregate(steps~date, data=activity_data, FUN=sum)
@@ -27,7 +30,6 @@ hist(total_steps_per_day$steps,
      xlab="Total number of steps per day")
 ```
 
-
 ```{r, mean ane median for total steps per day, echo=TRUE}
 mean(total_steps_per_day$steps)
 median(total_steps_per_day$steps)
@@ -35,30 +37,31 @@ median(total_steps_per_day$steps)
 
 ### What is the average daily activity pattern?
 
-The av
+The average steps per interval are calculated using aggregate(). These values are plotted against the time intervals. The interval with the largest number of steps is retrieved using which() function. 
 ```{r, echo=TRUE}
 
 average_steps_per_interval <- aggregate(steps ~ interval, 
                                         data=activity_data, 
                                         FUN=mean, na.rm=T)
-
+#Plot the average steps against intervals
 plot(steps ~ interval, data=average_steps_per_interval, type="l")
+
+#Which interval has the largest average steps per day?
 average_steps_per_interval$interval[which.max(average_steps_per_interval$steps)]
 
 ```
 
-## Imputing missing values
+### Imputing missing values
 
-#Calculate and report the total number of missing values in the dataset
+The total number of data with NA in the dataset is calculated.
 
-```{r, echo=TRUE}
+```{r total number of NAs, echo=TRUE}
 sum(apply(activity_data, 1, function(x) any(is.na(x))))
 ```
-#Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
-#In the following code, the missing values are being replaced by the mean for that 5-minute interval.
+In the following code, the missing values are being replaced by the mean for that 5-minute interval.
 
-```{r, echo=TRUE}
+```{r imputing the missing values, echo=TRUE}
 old <- activity_data
 for (i in 1:nrow(activity_data)) {
         
@@ -76,14 +79,20 @@ hist(total_steps_per_day_new$steps,
      main="Histogram of total number of steps per day",
      ylim = c(0,40),
      xlab="Total number of steps per day")
+
+# mean of the total number of steps in the new dataset
 mean(total_steps_per_day_new$steps)
-median(total_steps_per_day_new$steps)
 
+# median for the new dataset
+median(total_steps_per_day_new$steps)    
 ```
+Compared with the old dataset, the mean did not change since NAs were replaced with means for for the same time interval. There was a slight change in the median.
 
-## Are there differences in activity patterns between weekdays and weekends?
-```{r, echo = TRUE}
+### Are there differences in activity patterns between weekdays and weekends?
 
+A new factor variable with two levels is added to the new dataset. Then, the mean number of steps for a time interval is calculated separately for each level. 
+
+```{r weekdays vs weekends, echo = TRUE}
 dates <- weekdays(as.Date(activity_data_new$date))
 weekdays <- ifelse(dates%in%c("Saturday","Sunday"), "Weekend","Weekdays")
 activity_data_new$weekdays <- weekdays
@@ -96,14 +105,17 @@ average_steps_per_interval_weekdays <- aggregate(steps ~ interval,
                                         data=weekdays_data, 
                                         FUN=mean, na.rm=T)
 
-plot(steps ~ interval, data=average_steps_per_interval_weekdays, type="l", col="blue",
-     main="Mean steps per inverval")
+plot(steps ~ interval, data=average_steps_per_interval_weekdays, 
+     type="l", col="blue", main="Mean steps per inverval")
 
 average_steps_per_interval_weekend <- aggregate(steps ~ interval, 
                                         data=weekend_data, 
                                         FUN=mean, na.rm=T)
 
-lines(steps ~ interval, data=average_steps_per_interval_weekend, type="l", col="red")
-legend("topright", c("Weekdays","Weekend"), col=c("blue","red"), pch=19)
+lines(steps ~ interval, data=average_steps_per_interval_weekend, 
+      type="l", col="red")
+legend("topright", c("Weekdays","Weekend"), col=c("blue","red"), pch=19)  
 
-```
+```    
+    
+There is a difference in activity patterns between weekdays and weekends. The number of mean steps was higher in the time interval 500-1000 during weekdays, whereas it was higher in the time interval 1000-1700 during weekends.
