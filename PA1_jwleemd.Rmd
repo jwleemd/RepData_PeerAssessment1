@@ -106,7 +106,7 @@ average_steps_per_interval_weekdays <- aggregate(steps ~ interval,
                                         FUN=mean, na.rm=T)
 
 plot(steps ~ interval, data=average_steps_per_interval_weekdays, 
-     type="l", col="blue", main="Mean steps per inverval")
+     type="l", col="blue", main="Mean steps per interval")
 
 average_steps_per_interval_weekend <- aggregate(steps ~ interval, 
                                         data=weekend_data, 
